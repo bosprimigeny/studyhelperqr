@@ -1,8 +1,8 @@
 /**
  * @file qr_script.js
  * @description STUDYQR 学习通样式表
- * @author bosprimigenious
- * @copyright © bosprimigenious 2025
+ * @author bosprimigeny
+ * @copyright © bosprimigeny 2025
  * @license MIT 
  * @date 2025-05-21
  */

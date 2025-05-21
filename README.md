@@ -41,7 +41,7 @@ StudyQR 是一个支持二维码图片上传识别、内容解析并自动修改
 
 你也可以访问 GitHub Pages 部署版本（如果已启用）：
 
-👉 [https://bosprimigenious.github.io/StudyQr/](https://bosprimigenious.github.io/StudyQr/)
+👉 [https://bosprimigenious.github.io/StudyQR/]
 
 ---
 
@@ -69,9 +69,10 @@ StudyQR 是一个支持二维码图片上传识别、内容解析并自动修改
 ---
 
 ## 📂 项目结构
-
+ ```
 StudyQr/
 ├── index.html # 主页面
 ├── style.css # 页面样式
 ├── script.js # 主逻辑脚本
 └── logo.png
+ ```

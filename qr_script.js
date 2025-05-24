@@ -1,17 +1,32 @@
 /**
  * @file qr_script.js
- * @description STUDYQR 学习通样式表
+ * @description STUDYQR 学习通样式表 & 操作逻辑
  * @author bosprimigeny
  * @copyright © bosprimigeny 2025
  * @license MIT 
  * @date 2025-05-21
  */
+
 const fileInput = document.querySelector('input[type="file"]');
 const form = document.querySelector('.upload-form');
 const rightPanel = document.querySelector('.right-panel');
 
+let uploadClickCount = 0;
+let qrGenerateCount = 0;
+
+function updateStatsDisplay() {
+    const statsDiv = document.querySelector('#stats');
+    statsDiv.innerHTML = `
+        📁 上传文件次数：${uploadClickCount}<br>
+        🧾 生成二维码次数：${qrGenerateCount}
+    `;
+}
+
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    uploadClickCount++;
+    updateStatsDisplay();
 
     const file = fileInput.files[0];
     if (!file) return;
@@ -56,17 +71,16 @@ function modifyCreateTime(text) {
     const match = text.match(regex);
 
     if (match) {
-        const datePart = match[1];      
-        const sep = match[2];          
-        let hourStr = match[3];         
-        const rest = match[4];         
+        const datePart = match[1];
+        const sep = match[2];
+        let hourStr = match[3];
+        const rest = match[4];
 
         let hourNum = parseInt(hourStr, 10);
-        hourNum = (hourNum + 1) % 24;  
+        hourNum = (hourNum + 1) % 24;
         hourStr = hourNum.toString().padStart(2, '0');
 
         const newTime = `${datePart}${sep}${hourStr}${rest}`;
-
         const newText = text.replace(regex, `createTime=${newTime}`);
 
         displayDeadline(newTime.replace('T', ' '));
@@ -84,6 +98,9 @@ function modifyCreateTime(text) {
  * @param {string} data 二维码内容文本
  */
 function generateQRCode(data) {
+    qrGenerateCount++;
+    updateStatsDisplay();
+
     const oldQr = rightPanel.querySelector('.qr-result');
     if (oldQr) {
         oldQr.remove();
@@ -100,7 +117,6 @@ function generateQRCode(data) {
     qrContainer.appendChild(canvas);
     qrContainer.className = 'qr-result';
 
-    // 插入到右侧面板最前面
     rightPanel.insertBefore(qrContainer, rightPanel.firstChild);
 }
 
@@ -118,6 +134,6 @@ function displayDeadline(isoTime) {
     const deadline = document.createElement('p');
     deadline.className = 'deadline';
     deadline.textContent = `任务截止时间：${isoTime}`;
-    
+
     rightPanel.insertBefore(deadline, rightPanel.children[1]);
 }

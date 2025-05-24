@@ -1,139 +1,62 @@
-/**
- * @file qr_script.js
- * @description STUDYQR 学习通样式表 & 操作逻辑
- * @author bosprimigeny
- * @copyright © bosprimigeny 2025
- * @license MIT 
- * @date 2025-05-21
- */
+<!--
+  @file index.html
+  @description STUDYQR 学习通样式表
+  @author bosprimigeny
+  @copyright © bosprimigeny 2025
+  @license MIT
+  @date 2025-05-21
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>STUDYQR学习通</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script defer src="qr_script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="logo-box">
+                <img src="logo.jpg" alt="Logo" class="logo" />
+            </div>
+        </div>
+        <div class="right-panel" id="result-panel">
+            <!-- 🔢 添加统计区域 -->
+            <div id="stats" style="padding: 10px; font-weight: bold;"></div>
 
-const fileInput = document.querySelector('input[type="file"]');
-const form = document.querySelector('.upload-form');
-const rightPanel = document.querySelector('.right-panel');
+            <div class="reminder-text">
+                <h3>关于课堂签到与学习辅助的温馨提醒</h3>
+                <p>为帮助大家更好地完成学习任务、确保课堂签到无误，请各位同学配合以下事项：</p>
+                <ul>
+                    <li>照片提交：只需提交动态二维码的随意一张照片。</li>
+                    <li>时间规划：新生成的任务截止时间将严格控制在小时内，请留意进度；并且，老师关闭签到后无法再签到。</li>
+                    <li>签到保障：请放心，我们会保证你的信息不被泄露，确保每位同学顺利完成签到，安心专注于课堂学习。</li>
+                </ul>
+                <p>目标：通过有序协作，助力大家高效学习，杜绝因流程问题影响课堂参与。如有疑问，请随时沟通～</p>
+                <p>图片 logo 来源于 xhs，侵权联系删除～更好的建议欢迎联系。</p>
+                <p>本项目开发时间短，有任何建议和意见欢迎联系开发者 <span id="email"></span></p>
+            </div>
+        </div>
+    </div>
 
-let uploadClickCount = 0;
-let qrGenerateCount = 0;
+    <h2>上传含有二维码图片（png/jpg/jpeg），我们将自动识别内容并输出静态二维码，有效时间为一小时</h2>
 
-function updateStatsDisplay() {
-    const statsDiv = document.querySelector('#stats');
-    statsDiv.innerHTML = `
-        📁 上传文件次数：${uploadClickCount}<br>
-        🧾 生成二维码次数：${qrGenerateCount}
-    `;
-}
+    <form class="upload-form">
+        <input type="file" accept=".png,.jpg,.jpeg" required />
+        <button type="submit">上传识别并输出静态二维码</button>
+    </form>
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    <footer>
+        <p class="copyright">© bosprimigenious</p>
+    </footer>
 
-    uploadClickCount++;
-    updateStatsDisplay();
-
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async function (event) {
-        const imageDataUrl = event.target.result;
-
-        const image = new Image();
-        image.src = imageDataUrl;
-
-        image.onload = function () {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = image.width;
-            canvas.height = image.height;
-            ctx.drawImage(image, 0, 0);
-
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, canvas.width, canvas.height);
-
-            if (code) {
-                const originalText = code.data;
-                const newText = modifyCreateTime(originalText);
-                generateQRCode(newText);
-            } else {
-                alert('二维码识别失败，请使用清晰图像');
-            }
-        };
-    };
-    reader.readAsDataURL(file);
-});
-
-/**
- * 只修改 createTime 参数时间字符串中 T 后的小时数，加1小时
- * 不整体转Date，避免格式变动，只针对小时部分数字操作，保留其他部分不变
- * @param {string} text 原二维码文本内容
- * @returns {string} 修改后的文本
- */
-function modifyCreateTime(text) {
-    const regex = /createTime=([0-9]{4}-[0-9]{2}-[0-9]{2})([ T])([0-9]{2})(:[0-9]{2}:[0-9]{2})/;
-    const match = text.match(regex);
-
-    if (match) {
-        const datePart = match[1];
-        const sep = match[2];
-        let hourStr = match[3];
-        const rest = match[4];
-
-        let hourNum = parseInt(hourStr, 10);
-        hourNum = (hourNum + 1) % 24;
-        hourStr = hourNum.toString().padStart(2, '0');
-
-        const newTime = `${datePart}${sep}${hourStr}${rest}`;
-        const newText = text.replace(regex, `createTime=${newTime}`);
-
-        displayDeadline(newTime.replace('T', ' '));
-
-        return newText;
-    }
-
-    alert('未检测到 createTime 参数');
-    return text;
-}
-
-/**
- * 生成新的二维码并显示在页面右侧面板顶部
- * 如果已有二维码，先删除旧的，保持显示位置固定
- * @param {string} data 二维码内容文本
- */
-function generateQRCode(data) {
-    qrGenerateCount++;
-    updateStatsDisplay();
-
-    const oldQr = rightPanel.querySelector('.qr-result');
-    if (oldQr) {
-        oldQr.remove();
-    }
-
-    const qrContainer = document.createElement('div');
-    qrContainer.innerHTML = '<h3>静态二维码（支持一码多人）：</h3>';
-
-    const canvas = document.createElement('canvas');
-    QRCode.toCanvas(canvas, data, { width: 300 }, function (error) {
-        if (error) console.error(error);
-    });
-
-    qrContainer.appendChild(canvas);
-    qrContainer.className = 'qr-result';
-
-    rightPanel.insertBefore(qrContainer, rightPanel.firstChild);
-}
-
-/**
- * 在页面右侧面板显示任务截止时间（格式 YYYY-MM-DD HH:mm:ss）
- * 每次调用会先删除旧的显示
- * @param {string} isoTime ISO格式时间字符串
- */
-function displayDeadline(isoTime) {
-    const existingDeadline = rightPanel.querySelector('.deadline');
-    if (existingDeadline) {
-        existingDeadline.remove();
-    }
-
-    const deadline = document.createElement('p');
-    deadline.className = 'deadline';
-    deadline.textContent = `任务截止时间：${isoTime}`;
-
-    rightPanel.insertBefore(deadline, rightPanel.children[1]);
-}
+    <script>
+        const user = "sgqa5692";
+        const domain = "outlook.com";
+        document.getElementById("email").innerText = user + "@" + domain;
+    </script>
+</body>
+</html>

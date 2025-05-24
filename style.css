@@ -133,3 +133,16 @@ footer {
     font-size: 13px;
     margin-top: 40px;
 }
+
+/* 📊 上传统计展示样式 */
+#stats {
+    font-size: 15px;
+    font-weight: bold;
+    color: #8a4e12;
+    background-color: #fff7e6;
+    border: 1px dashed #d4a76c;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+}
